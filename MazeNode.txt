@@ -1,0 +1,87 @@
+import java.util.ArrayDeque;
+import java.util.Queue;
+import java.util.Scanner;
+
+class MazeNode {
+    int row, col, distance, numTwos;
+
+    public MazeNode(int row, int col, int distance, int numTwos) {
+        this.row = row;
+        this.col = col;
+        this.distance = distance;
+        this.numTwos = numTwos;
+    }
+}
+
+public class MazeSolver {
+
+    public static int findShortestPath(int[][] maze, int startRow, int startCol, int targetRow, int targetCol) {
+        int[] dr = {-1, 0, 1, 0};
+        int[] dc = {0, 1, 0, -1};
+
+        int rows = maze.length;
+        int cols = maze[0].length;
+
+        boolean[][][] visited = new boolean[rows][cols][3];
+
+        Queue<MazeNode> queue = new ArrayDeque<>();
+        queue.add(new MazeNode(startRow, startCol, 0, 0));
+        visited[startRow][startCol][0] = true;
+
+        while (!queue.isEmpty()) {
+            MazeNode current = queue.poll();
+
+            if (current.row == targetRow && current.col == targetCol) {
+                return current.distance;
+            }
+
+            for (int i = 0; i < 4; i++) {
+                int newRow = current.row + dr[i];
+                int newCol = current.col + dc[i];
+
+                if (newRow >= 0 && newRow < rows && newCol >= 0 && newCol < cols
+                        && maze[newRow][newCol] != 1
+                        && !visited[newRow][newCol][current.numTwos]) {
+                    int newTwos = current.numTwos + (maze[newRow][newCol] == 2 ? 1 : 0);
+
+                    if (maze[newRow][newCol] == 3 && newTwos > 0) {
+                        continue;
+                    }
+
+                    visited[newRow][newCol][newTwos] = true;
+                    queue.add(new MazeNode(newRow, newCol, current.distance + 1, newTwos));
+                }
+            }
+        }
+
+        return -1; // STUCK, no path found
+    }
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        // Input
+        int rows = scanner.nextInt();
+        int cols = scanner.nextInt();
+        int[][] maze = new int[rows][cols];
+
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                maze[i][j] = scanner.nextInt();
+            }
+        }
+
+        int startRow = scanner.nextInt();
+        int startCol = scanner.nextInt();
+        int targetRow = scanner.nextInt();
+        int targetCol = scanner.nextInt();
+
+        // Find and print the shortest path
+        int shortestPath = findShortestPath(maze, startRow, startCol, targetRow, targetCol);
+        if (shortestPath != -1) {
+            System.out.println(shortestPath);
+        } else {
+            System.out.println("STUCK");
+        }
+    }
+}
